@@ -1,7 +1,7 @@
 # Habits
 ### Sistema de Controle de Hábitos desenvolvido durante o evento NLW Setup da Rocketseat.
 
-![[https://user-images.githubusercontent.com/59755164/213929698-7a201292-0923-4057-8725-3096495c145d.png]]
+![Wallpaper](https://user-images.githubusercontent.com/59755164/213929698-7a201292-0923-4057-8725-3096495c145d.png)
 
 ### Como usar?
 
