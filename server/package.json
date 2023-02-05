@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx src/server.ts",
-    "prod": "npx prisma migrate dev --name update tables && npm run dev",
+    "prod": "npx prisma migrate dev --name update tables && tsc",
     "watch": "tsx watch src/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
