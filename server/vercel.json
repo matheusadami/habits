@@ -1,10 +1,12 @@
 {
   "name": "Habits (API)",
   "version": 2,
-  "build": {
-    "src": "src/api/server.ts",
-    "use": "@vercel/node"
-  },
+  "builds": [
+    {
+      "src": "src/api/server.ts",
+      "use": "@vercel/node"
+    }
+  ],
   "routes": [
     {
       "src": "/(.*)",
