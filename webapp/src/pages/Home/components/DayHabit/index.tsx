@@ -1,26 +1,32 @@
 import * as Popover from '@radix-ui/react-popover'
-import { ProgressBar } from './ProgressBar'
+import { ProgressBar } from '../ProgressBar/index'
 import clsx from 'clsx'
-import { DayHabitsList } from '@/components/DayHabitsList'
+import { DayHabitsInfo } from '@/pages/Home/components/DayHabitInfo/index'
 import dayjs from 'dayjs'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface Props {
   date: Date
-  amount?: number
+  defaultAmount?: number
   defaultCompleted?: number
 }
 
-export function DayHabit({ date, amount = 0, defaultCompleted = 0 }: Props) {
-  const [completed, setCompleted] = useState(defaultCompleted)
-
-  const completedPercentage = amount > 0 ? Math.round((completed / amount) * 100) : 0
+export function DayHabit({ date, defaultAmount = 0, defaultCompleted = 0 }: Props) {
+  const [completedPercentage, setCompletedPercentage] = useState(0)
 
   const dayAndMonth = dayjs(date).format('DD/MM')
   const dayOfWeek = dayjs(date).format('dddd')
 
-  function handleCompletedChanged(amountCompleted: number) {
-    setCompleted(amountCompleted)
+  useEffect(() => {
+    handleCompletedChanged(defaultCompleted, defaultAmount)
+  }, [])
+
+  function handleCompletedChanged(completed: number, amount: number) {
+    let percentage = 0
+    if (amount > 0) {
+      percentage = Math.round((completed / amount) * 100)
+      setCompletedPercentage(percentage)
+    }
   }
 
   return (
@@ -43,12 +49,13 @@ export function DayHabit({ date, amount = 0, defaultCompleted = 0 }: Props) {
       <Popover.Portal>
         <Popover.Content className="flex flex-col min-w-[320px] p-6 rounded-2xl bg-zinc-900">
           <Popover.Close />
+
           <span className="font-semibold text-zinc-400">{dayOfWeek}</span>
           <span className="mt-1 font-extrabold leading-tight text-3xl">{dayAndMonth}</span>
 
           <ProgressBar progress={completedPercentage} />
 
-          <DayHabitsList date={date} onCompletedChanged={handleCompletedChanged} />
+          <DayHabitsInfo date={date} onCompletedChanged={handleCompletedChanged} />
 
           <Popover.Arrow height={8} width={16} className="fill-zinc-900" />
         </Popover.Content>

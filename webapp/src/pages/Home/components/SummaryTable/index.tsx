@@ -1,8 +1,10 @@
 import { useId, useEffect, useState } from 'react'
-import { DayHabit } from './DayHabit'
-import { generateDatesFromYearBeginning } from '../utils/generate-dates-from-year-beginning'
 import axios from '@/lib/axios'
 import dayjs from 'dayjs'
+
+import { getAuthUserUid } from '@/services/firebase'
+import { DayHabit } from '@/pages/Home/components/DayHabit/index'
+import { generateDatesFromYearBeginning } from '@/utils/generateDatesFromYearBeginning'
 
 const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 
@@ -20,11 +22,14 @@ interface Summary {
 
 export function SummaryTable() {
   const [summary, setSummary] = useState<Summary[]>([])
+  const [isLoadedSummary, setIsLoadedSummary] = useState(false)
 
   useEffect(() => {
     const loadSummary = async () => {
-      const { data } = await axios.get('/summary')
+      const userUid = getAuthUserUid()
+      const { data } = await axios.get('/summary', { params: { userUid } })
       setSummary(data)
+      setIsLoadedSummary(true)
     }
 
     loadSummary()
@@ -35,9 +40,7 @@ export function SummaryTable() {
       <div className="grid grid-rows-7 grid-flow-row gap-3">
         {weekDays.map((weekDay, i) => {
           return (
-            <div
-              key={useId()}
-              className="text-zinc-400 text-xl h-10 w-10 font-bold flex items-center justify-center">
+            <div key={useId()} className="text-zinc-400 text-xl h-10 w-10 font-bold flex items-center justify-center">
               {weekDay}
             </div>
           )
@@ -45,17 +48,15 @@ export function SummaryTable() {
       </div>
 
       <div className="grid grid-rows-7 grid-flow-col gap-3">
-        {summary.length > 0 &&
+        {isLoadedSummary &&
           summaryDates.map((date) => {
-            const dayInSummary = summary.find((day) =>
-              dayjs(date).isSame(day.date, 'day')
-            )
+            const dayInSummary = summary.find((day) => dayjs(date).isSame(day.date, 'day'))
 
             return (
               <DayHabit
                 key={date.toString()}
                 date={date}
-                amount={dayInSummary?.amount}
+                defaultAmount={dayInSummary?.amount}
                 defaultCompleted={dayInSummary?.completed}
               />
             )

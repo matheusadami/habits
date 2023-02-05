@@ -1,21 +1,37 @@
 import { FastifyInstance } from "fastify"
 import dayjs from 'dayjs'
 import { z } from 'zod'
-import prisma from "./lib/prisma";
+import prisma from "./lib/prisma"
 
 export async function appRoutes(app: FastifyInstance) {
+  app.post('/sign-up', async (request) => {
+    const createSignUpParams = z.object({
+      userUid: z.string()
+    })
+
+    const { userUid } = createSignUpParams.parse(request.body)
+
+    await prisma.user.create({
+      data: {
+        userUid
+      }
+    })
+  })
+
   app.post('/habits', async (request) => {
     const createHabitsBody = z.object({
+      userUid: z.string(),
       title: z.string(),
       weekDays: z.array(z.number().min(0).max(6))
     })
 
-    const {title, weekDays} = createHabitsBody.parse(request.body);
+    const {userUid, title, weekDays} = createHabitsBody.parse(request.body);
 
     const today = dayjs().startOf('day').toDate()
 
     await prisma.habit.create({
       data: {
+        userUid,
         title,
         createAt: today,
         WeekDays: {
@@ -28,15 +44,16 @@ export async function appRoutes(app: FastifyInstance) {
   })
 
   app.get('/day', async (request) => {
-    const getDayParams = z.object({date: z.coerce.date()})
+    const getDayParams = z.object({userUid: z.string(), date: z.coerce.date()})
 
-    const { date } = getDayParams.parse(request.query)
+    const { userUid, date } = getDayParams.parse(request.query)
 
     const parsedDate = dayjs(date).startOf('day')
     const weekDay = parsedDate.get('day')
 
     const possibleHabits = await prisma.habit.findMany({
       where: {
+        userUid: userUid,
         createAt: {
           lte: date
         },
@@ -48,8 +65,9 @@ export async function appRoutes(app: FastifyInstance) {
       }
     })
 
-    const day = await prisma.day.findUnique({
+    const day = await prisma.day.findFirst({
       where: {
+        userUid: userUid,
         date: parsedDate.toDate()
       },
       include: {
@@ -62,17 +80,28 @@ export async function appRoutes(app: FastifyInstance) {
     return { possibleHabits, completedHabits }
   })
 
-  app.patch('/habits/:id/toggle', async (request) => {
+  app.patch('/habits/:uuid/toggle', async (request) => {
     const toggleHabitParams = z.object({
-      id: z.string().uuid()
+      uuid: z.string().uuid()
     })
 
-    const { id } = toggleHabitParams.parse(request.params)
+    const { uuid } = toggleHabitParams.parse(request.params)
 
     const today = dayjs().startOf('day').toDate()
 
-    let day = await prisma.day.findUnique({
+    const habit = await prisma.habit.findUnique({
       where: {
+        uuid: uuid
+      }
+    })
+
+    if (!habit) {
+      throw new Error('Habit not found')
+    }
+
+    let day = await prisma.day.findFirst({
+      where: {
+        userUid: habit.userUid,
         date: today
       },
     })
@@ -80,6 +109,7 @@ export async function appRoutes(app: FastifyInstance) {
     if (!day) {
       day = await prisma.day.create({
         data: {
+          userUid: habit.userUid,
           date: today
         }
       })
@@ -89,7 +119,7 @@ export async function appRoutes(app: FastifyInstance) {
       where: {
         dayId_habitId: {
           dayId: day.uuid,
-          habitId: id
+          habitId: uuid
         }
       }
     })
@@ -105,13 +135,19 @@ export async function appRoutes(app: FastifyInstance) {
       await prisma.dayHabit.create({
         data: {
           dayId: day.uuid,
-          habitId: id
+          habitId: uuid
         }
       })
     }
   })
 
-  app.get('/summary', async () => {
+  app.get('/summary', async (request) => {
+    const summaryParams = z.object({
+      userUid: z.string()
+    })
+    
+    const { userUid } = summaryParams.parse(request.query)
+
     const days = await prisma.$queryRaw`
       SELECT
         D.uuid,
@@ -131,8 +167,44 @@ export async function appRoutes(app: FastifyInstance) {
             AND h.createAt <= D.date
         ) amount
       FROM days D
+     WHERE D.userUid = ${userUid}
     `
 
     return days
+  })
+
+  app.post('/push-notification/subscribe', async (request) => {
+    const pushNotificationSubscribe = z.object({
+      userUid: z.string(),
+      subscription: z.string(),
+    })
+
+    const { userUid, subscription } = pushNotificationSubscribe.parse(request.body)
+
+    const userSubscription = await prisma.subscriber.findUnique({
+      where: {
+        userUid
+      }
+    })
+
+    if (!userSubscription) {
+      await prisma.subscriber.create({
+        data: {
+          userUid,
+          subscription
+        }
+      })
+    }
+    else {
+      await prisma.subscriber.update({
+        where: {
+          userUid: userSubscription.userUid
+        },
+        data: {
+          subscription
+        }
+      })
+    }
+
   })
 }

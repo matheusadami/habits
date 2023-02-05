@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import * as Checkbox from '@radix-ui/react-checkbox'
 import { Check } from 'phosphor-react'
 import axios from '@/lib/axios'
 import dayjs from 'dayjs'
 
+import { getAuthUserUid } from '@/services/firebase'
+
 interface Props {
   date: Date
-  onCompletedChanged: (amountCompleted: number) => void
+  onCompletedChanged: (completed: number, amount: number) => void
 }
 
 interface Habit {
@@ -20,49 +22,52 @@ interface HabitsInfo {
   completedHabits: string[]
 }
 
-export function DayHabitsList({ date, onCompletedChanged }: Props) {
-  const [habitsInfo, setHabitsInfo] = useState<HabitsInfo>()
+const initialHabitsInfo = {
+  possibleHabits: [],
+  completedHabits: []
+}
+
+export function DayHabitsInfo({ date, onCompletedChanged }: Props) {
+  const [habitsInfo, setHabitsInfo] = useState<HabitsInfo>({ ...initialHabitsInfo })
 
   const isDayInPast = dayjs(date).endOf('day').isBefore(new Date())
 
+  const loadDayHabits = useCallback(async () => {
+    const userUid = getAuthUserUid()
+    const { data } = await axios.get('/day', {
+      params: {
+        userUid,
+        date: date.toISOString()
+      }
+    })
+
+    setHabitsInfo(data)
+  }, [date])
+
   useEffect(() => {
-    const loadDayHabits = async () => {
-      const { data } = await axios.get('/day', {
-        params: {
-          date: date.toISOString()
-        }
-      })
-
-      setHabitsInfo(data)
-    }
-
     loadDayHabits()
-  }, [])
+  }, [loadDayHabits])
 
   async function handleToggleHabit(habitId: string) {
     await axios.patch(`/habits/${habitId}/toggle`)
 
-    const isHabitAlreadyCompleted =
-      habitsInfo?.completedHabits.includes(habitId)
+    const isHabitAlreadyCompleted = habitsInfo.completedHabits.includes(habitId)
 
     let completedHabits: string[] = []
 
     if (isHabitAlreadyCompleted) {
-      completedHabits = habitsInfo!.completedHabits.filter(
-        (id) => id !== habitId
-      )
+      completedHabits = habitsInfo.completedHabits.filter((id) => id !== habitId)
     } else {
-      completedHabits = [...habitsInfo!.completedHabits, habitId]
+      completedHabits = [...habitsInfo.completedHabits, habitId]
     }
 
-    setHabitsInfo((prev) => ({ ...prev!, completedHabits }))
-
-    onCompletedChanged(completedHabits.length)
+    setHabitsInfo((prev) => ({ ...prev, completedHabits }))
+    onCompletedChanged(completedHabits.length, habitsInfo.possibleHabits.length)
   }
 
   return (
     <div className="flex flex-col gap-3 mt-6">
-      {habitsInfo?.possibleHabits.map((habit) => (
+      {habitsInfo.possibleHabits.map((habit) => (
         <Checkbox.Root
           key={habit.uuid}
           disabled={isDayInPast}

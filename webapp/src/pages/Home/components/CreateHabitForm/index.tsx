@@ -1,7 +1,9 @@
 import { useId, useState } from 'react'
 import { Check } from 'phosphor-react'
-import * as Checkbox from '@radix-ui/react-checkbox'
 import axios from '@/lib/axios'
+import * as Checkbox from '@radix-ui/react-checkbox'
+
+import { getAuthUserUid } from '@/services/firebase'
 
 const availableWeekDays = [
   'Domingo',
@@ -16,17 +18,27 @@ const availableWeekDays = [
 export function CreateHabitForm() {
   const [title, setTitle] = useState('')
   const [weekDays, setWeekDays] = useState<number[]>([])
+  const [isLoading, setIsLoading] = useState(false)
 
   async function crateHabit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (!!title && !!weekDays.length) {
-      await axios.post('/habits', { title, weekDays })
+    try {
+      setIsLoading(true)
 
-      alert('Hábito criado com sucesso!')
+      if (!!title && !!weekDays.length) {
+        const userUid = getAuthUserUid()
+        await axios.post('/habits', { title, weekDays, userUid })
 
-      setTitle('')
-      setWeekDays([])
+        alert('Hábito criado com sucesso!')
+
+        setTitle('')
+        setWeekDays([])
+      }
+    } catch (error) {
+      alert('Não foi possível concluir a operação')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -74,9 +86,16 @@ export function CreateHabitForm() {
 
       <button
         type="submit"
-        className="flex justify-center items-center mt-6 rounded-lg p-4 gap-3 font-semibold bg-green-600 hover:bg-green-500 transition-colors">
-        <Check size={20} weight="bold" />
-        Confirmar
+        disabled={isLoading}
+        className="flex justify-center items-center mt-6 rounded-lg p-4 gap-3 font-semibold bg-green-600 hover:bg-green-500 disabled:opacity-80 transition-colors">
+        {isLoading ? (
+          'Carregando...'
+        ) : (
+          <>
+            <Check size={20} weight="bold" />
+            Confirmar
+          </>
+        )}
       </button>
     </form>
   )
