@@ -4,6 +4,10 @@ import { z } from 'zod'
 import prisma from "./lib/prisma"
 
 export async function appRoutes(app: FastifyInstance) {
+  app.get('/', () => {
+    return 'Welcome to Habits API! 👋'
+  })
+
   app.post('/sign-up', async (request) => {
     const createSignUpParams = z.object({
       userUid: z.string()
