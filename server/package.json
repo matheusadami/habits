@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx src/server.ts",
+    "prod": "npx prisma migrate dev --name update tables && npm run dev",
     "watch": "tsx watch src/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@types/node-cron": "^3.0.7",
+    "@types/web-push": "^3.3.2",
     "prisma": "^4.8.1",
     "tsx": "^3.12.2",
     "typescript": "^4.9.4"

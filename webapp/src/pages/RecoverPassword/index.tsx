@@ -16,7 +16,7 @@ export function RecoverPasswordPage() {
         throw new Error()
       }
 
-      await sendPasswordResetEmail(auth, email, { url: 'http://127.0.0.1:5173/' })
+      await sendPasswordResetEmail(auth, email, { url: window.location.origin })
 
       alert('E-mail enviado com sucesso. Por favor verifique sua caixa de entrada ou spam.')
     } catch (error) {

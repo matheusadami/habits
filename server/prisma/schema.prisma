@@ -62,7 +62,6 @@ model Day {
 
   user User @relation(fields: [userUid], references: [userUid])
 
-  @@unique([userUid])
   @@map("days")
 }
 

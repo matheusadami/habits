@@ -165,6 +165,7 @@ export async function appRoutes(app: FastifyInstance) {
           WHERE
             HWD.weekDay = cast(strftime('%w', D.date/1000, 'unixepoch') as int)
             AND h.createAt <= D.date
+            AND h.userUid = ${userUid}
         ) amount
       FROM days D
      WHERE D.userUid = ${userUid}
