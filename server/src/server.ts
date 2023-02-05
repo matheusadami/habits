@@ -16,3 +16,5 @@ Jobs.configJobs()
 PushNotification.config()
 
 app.listen({port: 3030}).then(() => console.log('Server is running!'))
+
+export default app
