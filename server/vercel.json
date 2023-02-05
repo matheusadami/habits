@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "outputDirectory": "src/dist",
+  "outputDirectory": "dist",
   "installCommand": "npm install",
   "buildCommand": "npm run prod",
   "builds": [
     {
-      "src": "src/dist/server.js",
+      "src": "dist/server.js",
       "use": "@vercel/node",
       "config": { "includeFiles": ["dist/**"] }
     }
@@ -13,7 +13,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "src/dist/server.js"
+      "dest": "dist/server.js"
     }
   ]
 }
