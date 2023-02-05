@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx src/server.ts",
-    "prod": "npx prisma migrate dev --name update tables && tsc",
-    "watch": "tsx watch src/server.ts",
+    "dev": "tsx src/api/server.ts",
+    "prod": "npx prisma migrate dev --name update tables",
+    "watch": "tsx watch src/api/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -18,6 +18,7 @@
     "dayjs": "^1.11.7",
     "fastify": "^4.11.0",
     "node-cron": "^3.0.2",
+    "vercel": "^28.15.0",
     "web-push": "^3.5.0",
     "zod": "^3.20.2"
   },

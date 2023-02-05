@@ -1,19 +1,13 @@
 {
   "version": 2,
-  "outputDirectory": "dist",
-  "installCommand": "npm install",
-  "buildCommand": "npm run prod",
-  "builds": [
-    {
-      "src": "dist/server.js",
-      "use": "@vercel/node",
-      "config": { "includeFiles": ["dist/**"] }
-    }
-  ],
+  "build": {
+    "src": "src/api/server.ts",
+    "use": "@vercel/node"
+  },
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "dist/server.js"
+      "dest": "src/api/server.ts"
     }
   ]
 }
