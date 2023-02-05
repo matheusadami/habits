@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "buildCommand": "npm run prod",
   "builds": [
     {
       "src": "dist/server.js",
