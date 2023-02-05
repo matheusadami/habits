@@ -1,3 +1,5 @@
+prisma/migrations/*
+prisma/database/*
 package-lock.json
 node_modules
 .vercel
