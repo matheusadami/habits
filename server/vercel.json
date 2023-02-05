@@ -1,4 +1,5 @@
 {
+  "name": "Habits (API)",
   "version": 2,
   "build": {
     "src": "src/api/server.ts",
