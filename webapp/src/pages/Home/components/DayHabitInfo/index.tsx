@@ -49,7 +49,7 @@ export function DayHabitsInfo({ date, onCompletedChanged }: Props) {
   }, [loadDayHabits])
 
   async function handleToggleHabit(habitId: string) {
-    await axios.patch(`/habits/${habitId}/toggle`)
+    await axios.patch(`/habits/${habitId}/toggle`, {})
 
     const isHabitAlreadyCompleted = habitsInfo.completedHabits.includes(habitId)
 
