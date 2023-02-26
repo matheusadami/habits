@@ -1,4 +1,4 @@
-import { createBrowserRouter, createRoutesFromElements, redirect, Route } from 'react-router-dom'
+import { createHashRouter, createRoutesFromElements, redirect, Route } from 'react-router-dom'
 import { SignInPage } from '@/pages/SignIn/index'
 import { HomePage } from '@/pages/Home'
 import { PrivateRoute } from '@/components/PrivateRoute/index'
@@ -19,4 +19,4 @@ const routes = createRoutesFromElements(
   </>
 )
 
-export const router = createBrowserRouter(routes)
+export const router = createHashRouter(routes)
